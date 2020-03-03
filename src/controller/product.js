@@ -2,18 +2,18 @@
 const {
   getProductCategory,
   getProductData,
-  deleteProduct,
+  getProductByName,
   postProduct,
-  getProductBrand
+  getProductBrand,
+  getProductListning,
+  getProductByBrandname,
+  getProductByCategoryname,
+  getProductByCategoryTree
 } = require('../models/product');
 
-// onst logger = require('../middleware/logging');
-
 // eslint-disable-next-line consistent-return
-function getPoductByCategoryRoutes(req, res, next) {
-  const p_category = req.params.category;
-
-  getProductCategory(p_category)
+function getPoductCategoryRoutes(req, res, next) {
+  getProductCategory()
     .then(p => {
       //
       if (p.rowCount === 0) {
@@ -27,13 +27,62 @@ function getPoductByCategoryRoutes(req, res, next) {
     })
     .catch(err => res.send(err.message, err.status));
 }
-function getProductByBrandRoutes(req, res, next) {
-  const p_brand = req.params.product_brand;
-  console.log(req.params)
-  getProductBrand(p_brand)
+function getProductBrandRoutes(req, res, next) {
+  getProductBrand()
     .then(p => {
       //
       if (p.rowCount === 0) {
+        next({
+          message: 'category is not available ',
+          status: 404
+        });
+      } else {
+        res.send(p.rows);
+      }
+    })
+    .catch(err => res.send(err.message, err.status));
+}
+
+function getProductByBrandnameRoutes(req, res, next) {
+  getProductByBrandname(req.params.brand_name)
+    .then(p => {
+      //
+      if (p.rowCount === 0) {
+        res.send([{ product_name: 'product not available' }]);
+        next({
+          message: 'brand is not available ',
+          status: 404
+        });
+      } else {
+        res.send(p.rows);
+      }
+    })
+    .catch(err => res.send(err.message, err.status));
+}
+
+function getProductByCategorynameRoutes(req, res, next) {
+  getProductByCategoryname(req.params.category_name)
+    .then(p => {
+      //
+      if (p.rowCount === 0) {
+        res.send([{ message: 'no data' }]);
+        next({
+          message: 'brand is not available ',
+          status: 404
+        });
+      } else {
+        res.send(p.rows);
+      }
+    })
+    .catch(err => res.send(err.message, err.status));
+}
+
+function getProductByCategoryTreeRoutes(req, res, next) {
+  getProductByCategoryTree(req.params.category_name)
+    .then(p => {
+      //
+      if (p.rowCount === 0) {
+        // res.send([{ count: 0 }]);
         next({
           message: 'category is not available ',
           status: 404
@@ -61,17 +110,17 @@ function getProductDataRoutes(req, res, next) {
 }
 
 // eslint-disable-next-line consistent-return
-function deleteProductByIDRoutes(req, res, next) {
-  const pid = req.params.product_id;
-  deleteProduct(pid)
+function getProductByNameRoutes(req, res, next) {
+  const pname = req.params.product_name;
+  getProductByName(pname)
     .then(p => {
       if (p.rowCount === 0) {
         next({
-          message: 'unable to delete id is not available ',
+          message: 'no data',
           status: 404
         });
       } else {
-        res.send(`deleted id:${pid}`);
+        res.send(p.rows);
       }
     })
     .catch(err => res.send(err.message, err.status));
@@ -81,7 +130,7 @@ function deleteProductByIDRoutes(req, res, next) {
 function postProductRoutes(req, res) {
   const values = Object.values(req.body);
   // const keys = Object.keys(req.query);
-  const KeyVal = Object.values(req.query);
+  // const KeyVal = Object.values(req.query);
 
   postProduct(values)
     .then(p => {
@@ -93,13 +142,46 @@ function postProductRoutes(req, res) {
     })
     .catch(err => res.send(err.message, err.status));
 }
+
+function getProductListningRoutes(req, res, next) {
+  const keys = Object.keys(req.query);
+  const KeyVal = Object.values(req.query);
+  if (keys.length === 0) {
+    getProductData()
+      .then(p => {
+        if (p.count === 0) {
+          next({
+            message: 'there is no data in the table',
+            status: 404
+          });
+        } else {
+          res.send(p.rows);
+        }
+      })
+      .catch(err => res.send(err.message, err.status));
+  } else {
+    getProductListning(keys, KeyVal)
+      .then(p => {
+        if (p.rows) {
+          res.send(p.rows);
+        } else {
+          res.send(p.detail);
+        }
+      })
+      .catch(err => res.send(err.message, err.status));
+  }
+}
 // update
 // eslint-disable-next-line consistent-return
 
 module.exports = {
-  getPoductByCategoryRoutes,
   getProductDataRoutes,
-  deleteProductByIDRoutes,
+  getProductByNameRoutes,
   postProductRoutes,
-  getProductByBrandRoutes
+  getProductBrandRoutes,
+  getProductListningRoutes,
+  getPoductCategoryRoutes,
+  getProductByBrandnameRoutes,
+  getProductByCategorynameRoutes,
+  getProductByCategoryTreeRoutes
 };

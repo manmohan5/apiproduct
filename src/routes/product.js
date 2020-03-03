@@ -2,20 +2,29 @@
 const express = require('express');
 
 const {
-  getPoductByCategoryRoutes,
+  getPoductCategoryRoutes,
   getProductDataRoutes,
   postProductRoutes,
-  deleteProductByIDRoutes,
-  getProductByBrandRoutes
+  getProductBrandRoutes,
+  getProductByBrandnameRoutes,
+  getProductByCategorynameRoutes,
+  getProductByCategoryTreeRoutes,
+  getProductByNameRoutes
 } = require('../controller/product');
 
 const router = express.Router();
 router.use(express.json());
 
-router.get('/', getProductDataRoutes);
-router.get('/category/:category', getPoductByCategoryRoutes);
-router.get('/brand/:product_brand', getProductByBrandRoutes);
-router.post('/', postProductRoutes);
-router.delete('/:product_id', deleteProductByIDRoutes);
+router.get('/products', getProductDataRoutes);
+router.get('/products/:product_name', getProductByNameRoutes);
+router.get('/category', getPoductCategoryRoutes);
+router.get('/brand', getProductBrandRoutes);
+router.get('/brand/:brand_name', getProductByBrandnameRoutes);
+router.get('/category/:category_name', getProductByCategorynameRoutes);
+router.get(
+  '/category/categorytree/:category_name',
+  getProductByCategoryTreeRoutes
+);
+router.post('/products', postProductRoutes);
 
 module.exports = router;

@@ -23,6 +23,6 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-app.use('/products', products, errorHandler);
+app.use('/', products, errorHandler);
 app.use('*', (req, res) => res.status(404).send('invalid url'));
 app.use(logger.error);
